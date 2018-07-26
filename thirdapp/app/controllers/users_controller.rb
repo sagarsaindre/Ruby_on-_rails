@@ -10,6 +10,7 @@ class UsersController < ApplicationController
 
   def show
     @user = User.find(params[:id])
+    @microposts = @user.microposts.paginate(page: params[:page])
   end
   def new
     @user = User.new
@@ -19,9 +20,10 @@ class UsersController < ApplicationController
      @user = User.new(user_params)   # Not the final implementation!
       if @user.save
       # Handle a successful save.
-       log_in @user
-      flash[:success] = "Welcome to the Sample App!"
-      redirect_to @user
+       UserMailer.account_activation(@user).deliver_now
+      flash[:info] = "Please check your email to activate your account."
+      redirect_to root_url
+
     else
       render 'new'
     end
@@ -57,13 +59,13 @@ class UsersController < ApplicationController
     end
 
     # Confirms a logged-in user.
-    def logged_in_user
-      unless logged_in?
-          store_location
-        flash[:danger] = "Please log in."
-        redirect_to login_url
-      end
-    end
+    # def logged_in_user
+    #   unless logged_in?
+    #       store_location
+    #     flash[:danger] = "Please log in."
+    #     redirect_to login_url
+    #   end
+    # end
 
      # Confirms the correct user.
     def correct_user
